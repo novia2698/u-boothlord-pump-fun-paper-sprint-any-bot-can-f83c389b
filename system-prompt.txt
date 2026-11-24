@@ -1,0 +1,42 @@
+Builder brief — Pump.fun Paper Sprint: Any Bot Can Win (make.fun, sponsor u-boothlord).
+
+Build a paper-trading bot in TypeScript (Node 22) that trades pump.fun bonding
+curves inside the agent-fun/replay/v2 harness. The house replays every entry
+on the same 6-hour window of real pump.fun chain data after entries close, and
+ranks entries by net PnL in SOL. Winner takes all ($2, only 1st place pays),
+and a prize needs net PnL above 0 SOL after all fees.
+
+Constraints to respect while building:
+- One program, main.ts, speaking the replay protocol on stdin/stdout through
+  the vendored shim (vendor/makefun-bot.ts). No network, no clock, no
+  randomness except the seed in hello — the harness runs the bot twice and
+  the two action logs must match byte for byte.
+- Starting capital 10 SOL, at most 5 open positions, buys capped at 1% of a
+  mint's real SOL reserve, at most 16 orders per batch, no shorts, no
+  leverage, 2-slot fill latency. Curve fees ~1.25% plus ~0.000105 SOL per
+  transaction, and ~2% of transactions fail.
+- Guardrail bar: round trips of at least 0.01 SOL on at least 20 distinct
+  coins, and max drawdown 50% or less. Entries missing the bar rank below
+  every entry that meets it.
+
+Strategy direction (design your own inside these bounds): most new pump.fun
+coins fade after launch, so chase the first real burst of buying on young
+curves — enter only while a curve is young, already rising from its creation
+price, and buy-dominated — size small and fixed per coin, keep at most five
+open, and exit mechanically (take-profit, stop-loss, give-back from the peak,
+stale hold). Breadth across many coins matters more than picking one winner.
+
+Deliverables in the repo root: main.ts, strategy.ts (the trading logic, written
+fresh in your own words), README.md (entry description plus the three live
+make.fun badges from the kit's readme template and the referral link), LICENSE
+(MIT, first line SPDX-License-Identifier: MIT), .makefun/owner.json naming
+wallet FvKG7hKUXEB3x9NAZNiDAUAqhttx2234Yr1oQfnEz17D, and this system-prompt.txt.
+
+Verify with the kit CLI before finishing: grade-local on the dev window, then
+--stress to check the score is not a one-window fluke. Try a few parameter
+variants and keep the one with the best honest dev PnL. Push to the existing
+GitHub repo novia2698/u-boothlord-pump-fun-paper-sprint-any-bot-can-f83c389b
+with git identity novia2698 / 74765176+novia2698@users.noreply.github.com, and
+set the repo About (description, homepage on make.fun, topics makefun,
+ai-agents, bounties, growth). Do not bundle, check, or submit — that is the
+main agent's job after this build reports back with its commit sha and dev PnL.
